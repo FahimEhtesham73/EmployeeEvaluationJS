@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="evaluator.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <title>Evaluator Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url("photos/EES90.png");
+            max-width: auto;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 1000px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #35b8a6;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 12px;
+        }
+
+        th {
+            background-color: #35b8a6;
+            color: white;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="checkbox"] {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border: 1px solid #35b8a6;
+        }
+
+        .submitbtn {
+            background-color: #35b8a6;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 30%;
+            margin-top: 30px;
+            font-size: 18px;
+        }
+
+        .submitbtn:hover {
+            background-color: #0a5046;
+        }
+        .signoutbtn{
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #f71c65;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            opacity: 0.9;;
+        }
+        .signoutbtn:hover{
+            background-color:#ac1a4b;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: auto; 
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            p {
+                font-size: 1.2rem;
+            }
+            table {
+                margin-top: 1rem;
+            }
+            table, th, td {
+                padding: 1rem;
+            }
+            input[type="text"],
+            input[type="number"],
+            input[type="checkbox"] {
+                padding: 1rem;
+                margin: 0.5rem 0;
+            }
+            .submitbtn {
+                padding: 1.5rem;
+                margin-top: 1rem;
+            }
+            .signoutbtn {
+                padding: 1rem 2rem;
+            }
+        }
+        
+
+
+    </style>
+</head>
+<body>
+    <form id="evaluationForm">
+        <div class="container">
+            <h1 style="color:#35b8a6; font-size: 60px;">Evaluator Dashboard</h1>
+            <p>Evaluate employee projects and recommend for Salary Increment or Promotion.</p>
+            <hr>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Project Name</th>
+                        <th>Project Deadline</th>
+                        <th>Project Role</th>
+                        <th>Project Contribution</th>
+                        <th>Project Progress (%)</th>
+                        <th>Employee ID</th>
+                        <th>Project ID</th>
+                    </tr>
+                </thead>
+                <tbody id="projectList"></tbody>
+            </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Recommend for Salary Increment</th>
+                        <th>Recommend for Promotion</th>
+                    </tr>
+                </thead>
+                <tbody id="employeeRecommendations"></tbody>
+            </table>
+            <hr>
+            <button type="submit" class="submitbtn" id="submitBtn" disabled>Submit Recommendations</button>
+            
+        </div>
+        <button type="button" class="signoutbtn" onclick="signOut()">Sign Out</button>
+    </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const projectUpdate = JSON.parse(localStorage.getItem("projectUpdate")) || [];
+            const projectList = document.getElementById("projectList");
+            const employeeRecommendations = document.getElementById("employeeRecommendations");
+
+            let employeeData = JSON.parse(localStorage.getItem("employeeData")) || {};
+
+            projectUpdate.forEach((project, index) => {
+                const row = projectList.insertRow(-1);
+                row.insertCell(0).textContent = project.projectName;
+                row.insertCell(1).textContent = project.deadline;
+                row.insertCell(2).textContent = project.role;
+                row.insertCell(3).textContent = project.contribution;
+                row.insertCell(4).textContent = project.progress;
+                row.insertCell(5).textContent = project.employeeID;
+                row.insertCell(6).textContent = project.projectID;
+
+                if (!employeeData[project.employeeID]) {
+                    employeeData[project.employeeID] = {
+                        recommendSalaryIncrement: false,
+                        recommendPromotion: false,
+                    };
+                }
+            });
+
+            for (const employeeID in employeeData) {
+                const row = employeeRecommendations.insertRow(-1);
+                row.insertCell(0).textContent = employeeID;
+
+
+
+                const recommendSalaryIncrementCell = row.insertCell(1);
+                const recommendSalaryIncrementCheckbox = document.createElement("input");
+                recommendSalaryIncrementCheckbox.type = "checkbox";
+                recommendSalaryIncrementCheckbox.checked = employeeData[employeeID].recommendSalaryIncrement;
+                recommendSalaryIncrementCell.appendChild(recommendSalaryIncrementCheckbox);
+
+
+                const recommendPromotionCell = row.insertCell(2);
+                const recommendPromotionCheckbox = document.createElement("input");
+                recommendPromotionCheckbox.type = "checkbox";
+                recommendPromotionCheckbox.checked = employeeData[employeeID].recommendPromotion;
+                recommendPromotionCell.appendChild(recommendPromotionCheckbox);
+
+                
+                recommendSalaryIncrementCheckbox.addEventListener("change", function () {
+                    employeeData[employeeID].recommendSalaryIncrement = recommendSalaryIncrementCheckbox.checked;
+                    updateSubmitButton();
+                });
+
+                recommendPromotionCheckbox.addEventListener("change", function () {
+                    employeeData[employeeID].recommendPromotion = recommendPromotionCheckbox.checked;
+                    updateSubmitButton();
+                });
+            }
+
+            updateSubmitButton();
+        });
+
+        function updateSubmitButton() {
+            const checkboxes = document.querySelectorAll("input[type='checkbox']");
+            const submitBtn = document.getElementById("submitBtn");
+
+            let atLeastOneChecked = false;
+            checkboxes.forEach((checkbox) => {
+                if (checkbox.checked) {
+                    atLeastOneChecked = true;
+                }
+            });
+
+            submitBtn.disabled = !atLeastOneChecked;
+        }
+
+        document.getElementById("evaluationForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+           
+            const employeeData = {};
+            const checkboxes = document.querySelectorAll("input[type='checkbox']");
+
+            checkboxes.forEach((checkbox, index) => {
+                const row = checkbox.closest("tr");
+                const employeeID = row.cells[0].textContent;
+
+                if (!employeeData[employeeID]) {
+                    employeeData[employeeID] = {
+                        recommendSalaryIncrement: false,
+                        recommendPromotion: false,
+                    };
+                }
+
+                if (checkbox.parentNode.cellIndex === 1) {
+                    employeeData[employeeID].recommendSalaryIncrement = checkbox.checked;
+                }
+                if (checkbox.parentNode.cellIndex === 2) {
+                    employeeData[employeeID].recommendPromotion = checkbox.checked;
+                }
+            });
+
+            localStorage.setItem("employeeData", JSON.stringify(employeeData));
+
+            alert("Recommendations are saved to local storage.");
+        });
+
+        function signOut() {
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html

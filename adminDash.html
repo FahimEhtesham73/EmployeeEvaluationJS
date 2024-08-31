@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url("photos/EES05.jpg");
+            max-width:auto;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 500px;
+            text-align: center;
+            margin-left: 50px;
+            margin: 20px;
+            
+        }
+
+        h1 {
+            color: #35b8a6;
+            font-size: 28px;
+        }
+
+        p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        select,
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        select {
+            height: 100px;
+        }
+
+        button.assignbtn {
+            background-color: #b700ff;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        button.assignbtn:hover {
+            background-color: #0056b3;
+        }
+
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #ccc;
+        }
+
+        button.signoutbtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #f71c65;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            opacity: 0.9;
+        }
+
+        button.signoutbtn:hover {
+            background-color: #b30000;
+        }
+
+        
+        table#recommendations {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        table#recommendations, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 12px;
+        }
+
+        th {
+            background-color: #35b8a6;
+            color: white;
+        }
+
+        
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+            }
+
+            table#recommendations {
+                width: 100%;
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: 100%;
+            }
+
+            table#recommendations {
+                width: 100%;
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <form id="projectForm">
+        <div class="container">
+            <h1>Admin Dashboard</h1>
+            <p>Fill out the form to assign a project to an employee.</p>
+            <hr>
+            
+            <label for="projectName"><b>Project Name</b></label>
+            <input type="text" placeholder="Enter Project Name" name="projectName" id="projectName" required>
+            
+            <label for="employeeList"><b>Select Employee(s)</b></label>
+            <select id="employeeList" multiple="multiple" required></select>
+            
+            <label for="projectDeadline"><b>Project Deadline</b></label>
+            <input type="date" name="projectDeadline" id="projectDeadline" required>
+            
+            <label for="projectID"><b>ProjectID </b></label>
+            <input type="text" placeholder="Enter ProjectID" name="projectID" id="projectID" required>
+            
+            <hr>
+            
+            <button type="submit" class="assignbtn">Assign Project</button>
+
+           
+
+        
+        </div>]
+        <button type="button" class="signoutbtn" onclick="signOut()">Sign Out</button>
+    </form>
+    <div class="container">
+        <h2>Employee Recommendations</h2>
+        <table id="recommendations">
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Recommend for Salary Increment</th>
+                    <th>Recommend for Promotion</th>
+                </tr>
+            </thead>
+            <tbody id="employeeRecommendations"></tbody>
+        </table>
+    </div>
+
+    
+    <script>
+        function populateEmployeeList() {
+            const employeeList = document.getElementById("employeeList");
+            const users = JSON.parse(localStorage.getItem("users")) || [];
+            for (const user of users) {
+
+                if (user.role === "employee") {
+                    const option = document.createElement("option");
+                    option.value = user.employeeId;
+                    option.text = user.name; 
+                    employeeList.appendChild(option);
+                }
+            }
+
+
+        }
+        
+        document.addEventListener("DOMContentLoaded", function () {
+            // populateEmployeeList();
+            
+            const projectForm = document.getElementById("projectForm");
+            projectForm.addEventListener("submit", assignProject);
+
+        });
+
+        
+        function isProjectIdUnique(projectID) {
+        const projects = JSON.parse(localStorage.getItem("projects")) || [];
+        return projects.some((project) => project.projectID === projectID);
+    }
+
+    function assignProject(event) {
+        event.preventDefault();
+        const projectName = document.getElementById("projectName").value;
+        const employeeList = document.getElementById("employeeList");
+        const selectedEmployees = Array.from(employeeList.selectedOptions).map((option) => option.value);
+        const projectDeadline = document.getElementById("projectDeadline").value;
+        const projectID = document.getElementById("projectID").value;
+
+        if (isProjectIdUnique(projectID)) {
+            alert("Project ID already exists.");
+        } else {
+            const project = {
+                name: projectName,
+                employees: selectedEmployees,
+                deadline: projectDeadline,
+                projectID: projectID,
+            };
+
+            const projects = JSON.parse(localStorage.getItem("projects")) || [];
+            projects.push(project);
+            localStorage.setItem("projects", JSON.stringify(projects));
+
+            alert("Project assigned successfully!");
+            projectForm.reset();
+        }
+    }
+
+        function signOut() {
+            window.location.href = "login.html";
+        }
+        function populateRecommendationsTable() {
+        const employeeData = JSON.parse(localStorage.getItem("employeeData")) || {};
+        const employeeRecommendationsTable = document.getElementById("employeeRecommendations");
+
+        for (const employeeID in employeeData) {
+            const row = employeeRecommendationsTable.insertRow(-1);
+            row.insertCell(0).textContent = employeeID;
+
+            
+            const recommendSalaryIncrementCell = row.insertCell(1);
+            recommendSalaryIncrementCell.textContent = employeeData[employeeID].recommendSalaryIncrement ? "Yes" : "No";
+
+            const recommendPromotionCell = row.insertCell(2);
+            recommendPromotionCell.textContent = employeeData[employeeID].recommendPromotion ? "Yes" : "No";
+        }
+    }
+
+   
+    document.addEventListener("DOMContentLoaded", function () {
+        populateEmployeeList();
+        populateRecommendationsTable();
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <title>Document</title>
+    <style>
+        * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  color: #333;
+  background-image: url("photos/EES9.JPG");
+  max-width: auto;
+  
+  
+  
+}
+
+
+.container{
+  background-color: #000000;
+  max-width: 400px;
+  max-height: auto;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 5px;
+  background-color: #000000;
+ 
+         
+}
+.container3{
+    background-color: #fff;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0px; 
+    border-radius: 5px;
+    text-align: center;
+  background-color: #000000;
+}
+
+
+h1 {
+  text-align: center;
+  color: #000000;
+}
+
+
+label {
+  font-weight: bold;
+  color: white;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+
+.registerbtn {
+  background-color: #f32b6e;
+  color: #fff;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.registerbtn:hover {
+  background-color: #0056b3;
+}
+
+
+.signin a {
+  text-decoration: none;
+  color:  #f32b6e;
+}
+
+.signin a:hover {
+  text-decoration: underline;
+}
+b{
+  color:white ;
+}
+p{
+  color: white;
+}
+a{
+  color:#f32b6e;
+}
+
+@media (min-width: 768px) {
+    .container {
+      max-width: 400px; 
+    }
+}
+
+
+h1 {
+    text-align: center;
+    color: white;
+    font-size: 30px;
+}
+
+@media (min-width: 768px) {
+    h1 {
+      font-size: 70px;
+      visibility: visible; 
+      
+    }
+}
+
+
+    </style>
+</head>
+<body>
+    <div class = "container3">
+    <h1 style="text-align: center; color:White; font-size:70px;">Employee Evaluation System</h1>
+    </div>
+    <br>
+
+<form class="form" id="form">
+    <div class="container">
+        <p>Please fill out this form to create an account.</p>
+        <hr>
+
+        <label for="employeeId"><b>Employee ID</b></label>
+        <input type="text" placeholder="Enter Employee ID" name="employeeId" id="employeeId" required><br>
+
+        <label for="name"><b>Name</b></label>
+        <input type="text" placeholder="Enter name" name="name" id="name" required><br>
+
+        <label for="email"><b>Email</b></label>
+        <input type="email" placeholder="Enter Email" name="email" id="email" required><br>
+
+        <label for="password"><b>Password</b></label>
+        <input type="password" placeholder="Enter Password" name="password" id="password" required><br>
+
+        <label for="pswrepeat"><b>Repeat Password</b></label>
+        <input type="password" placeholder="Repeat Password" name="pswrepeat" id="pswrepeat" required>
+
+        <label for="role">Choose a Role:</label>
+        <select id="role" required>
+            <option id="employee" value="employee">Employee</option>
+            <option id="admin" value="admin">Admin</option>
+            <option id="evaluator" value="evaluator">Evaluator</option>
+        </select>
+
+        <hr>
+
+        <p>By creating an account, you agree to our <a href="#">TERMS & PRIVACY</a></p>
+
+        <button type="button" class="registerbtn" onclick="saveData()">Register</button>
+        <br>
+    </div>
+
+    <div class="container signin">
+        <p>Already have an account? <a href="login.html">Sign in.</a></p>
+    </div>
+</form>
+
+<script>
+    function isEmployeeIdUnique(employeeId) {
+        let user_records = JSON.parse(localStorage.getItem("users")) || [];
+        return user_records.some((v) => v.employeeId === employeeId);
+    }
+    
+    function saveData() {
+        let employeeId, name, email, password, pswrepeat, role;
+        employeeId = document.getElementById('employeeId').value;
+        name = document.getElementById('name').value;
+        email = document.getElementById('email').value;
+        password = document.getElementById('password').value;
+        pswrepeat = document.getElementById('pswrepeat').value;
+        role = document.getElementById('role').value;
+    
+        if (employeeId.trim() === '' || name.trim() === '' || email.trim() === '' || password.trim() === '' || pswrepeat.trim() === '' || role.trim() === '') {
+            alert('Please fill all required fields!');
+        } else if (password !== pswrepeat) {
+            alert('Passwords do not match.');
+        } else if (password.length < 8) {
+            alert('Password should be at least 8 characters long.');
+        } else if (!/^[a-z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email)) {
+            alert('Invalid Email');
+        } else if (isEmployeeIdUnique(employeeId)) {
+            alert('Employee ID is already registered.');
+        } else {
+            let user_records = JSON.parse(localStorage.getItem("users")) || [];
+            user_records.push({
+                "employeeId": employeeId,
+                "name": name,
+                "email": email,
+                "password": password,
+                "role": role
+            });
+            localStorage.setItem("users", JSON.stringify(user_records));
+            alert('Registration successful.');
+            window.location.href = "login.html";
+        }
+    }
+    </script>
+    
+
+</body>
+</html>

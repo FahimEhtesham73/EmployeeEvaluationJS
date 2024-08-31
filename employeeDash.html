@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url("photos/EES11.jpg");
+        }
+
+        .container {
+            background-color: #000000;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 1000px;
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            color: #f71c65;
+        }
+
+        p {
+            color: #555;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 10px;
+            color: white;
+        }
+
+        th {
+            background-color: #04090e;
+            color: #fff;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 80%;
+            padding: 8px;
+            margin: 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border: 1px solid #007bff;
+        }
+
+        .submitbtn {
+            background-color: #f71c65;
+            color: white;
+            padding: 10px 5px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 15%;
+            opacity: 0.9;
+        }
+
+        .submitbtn:hover {
+            opacity: 1;
+            color: aqua;
+        }
+
+        .signoutbtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #f71c65;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            opacity: 0.9;
+        }
+
+        .signoutbtn:hover {
+            opacity: 1;
+            color: aqua;
+        }
+
+        .message {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    
+    <h1>Welcome to the Employee Dashboard</h1>
+    <p>Your Assigned Projects:</p>
+    <div class="message" id="noProjectsMessage"></div>
+    <table id="projectTable">
+        <thead>
+        <tr>
+            <th>Project Name</th>
+            <th>Project Deadline</th>
+            <th>Project Role</th>
+            <th>Project Contribution</th>
+            <th>Project Progress (%)</th>
+            <th>EmployeeID</th>
+            <th>ProjectID</th>
+        </tr>
+        </thead>
+        <tbody id="projectList"></tbody>
+    </table>
+    <br>
+    <button type="button" class="submitbtn" onclick="submitEmpDash()">Submit</button>
+    <br>
+</div>
+<button class="signoutbtn" onclick="signOut()">Sign Out</button>
+<script>
+    let employeeID;
+    document.addEventListener("DOMContentLoaded", function () {
+    employeeID = JSON.parse(localStorage.getItem("loggedIDs")).employeeId;
+    const projects = JSON.parse(localStorage.getItem("projects")) || [];
+    const projectList = document.getElementById("projectList");
+    const projectTable = document.getElementById("projectTable");
+    const noProjectsMessage = document.getElementById("noProjectsMessage");
+    let hasProjects = false;
+
+    projects.forEach((project, index) => {
+        if (project.employees.includes(employeeID)) {
+            hasProjects = true;
+            const row = projectList.insertRow(-1);
+            const nameCell = row.insertCell(0);
+            const deadlineCell = row.insertCell(1);
+            const roleCell = row.insertCell(2);
+            const contributionCell = row.insertCell(3);
+            const progressCell = row.insertCell(4);
+            const employeeIDCell = row.insertCell(5);
+            const projectIDCell = row.insertCell(6);
+
+            nameCell.innerHTML = project.name;
+            deadlineCell.innerHTML = project.deadline;
+            roleCell.innerHTML = `<input type="text" id="projectRole${index}" placeholder="Enter your role" required>`;
+            contributionCell.innerHTML = `<input type="text" id="projectContribution${index}" placeholder="Enter your contribution" required>`;
+            progressCell.innerHTML = `<input type="number" id="projectProgress${index}" placeholder="Enter project progress" required>`;
+            employeeIDCell.innerHTML = employeeID;
+            projectIDCell.innerHTML = project.projectID;
+        }
+    });
+
+    const submitButton = document.querySelector(".submitbtn");
+    if (!hasProjects) {
+        projectTable.style.display = "none";
+        noProjectsMessage.innerText = "No assigned projects for you.";
+        submitButton.disabled = true; 
+    }
+    else {
+        submitButton.disabled = false; 
+    }
+});
+
+
+    function validateInputs() {
+        let isValid = true;
+        const projects = JSON.parse(localStorage.getItem("projects")) || [];
+
+        for (let index = 0; index < projects.length; index++) {
+            const roleInput = document.getElementById(`projectRole${index}`);
+            const progressInput = document.getElementById(`projectProgress${index}`);
+            const contributionInput = document.getElementById(`projectContribution${index}`);
+
+            if (roleInput && progressInput && contributionInput) {
+                const roleValue = roleInput.value.trim();
+                const progressValue = progressInput.value.trim();
+                const contributionValue = contributionInput.value.trim();
+
+                if (roleValue === "" || progressValue === "" || contributionValue === "") {
+                    alert("Please fill in all fields for project " + projects[index].name);
+                    isValid = false;
+                    break;
+                }
+
+                if (isNaN(progressValue) || progressValue < 0 || progressValue > 100) {
+                    alert("Progress must be a number between 0 and 100 for project " + projects[index].name);
+                    isValid = false;
+                    break;
+                }
+            }
+        }
+
+        return isValid;
+    }
+
+    function submitEmpDash() {
+        if (validateInputs()) {
+            let empProjectUpdate = JSON.parse(localStorage.getItem("projectUpdate")) || [];
+            const projects = JSON.parse(localStorage.getItem("projects")) || [];
+
+            for (let index = 0; index < projects.length; index++) {
+                const roleInput = document.getElementById(`projectRole${index}`);
+                const progressInput = document.getElementById(`projectProgress${index}`);
+                const contributionInput = document.getElementById(`projectContribution${index}`);
+
+                if (roleInput && progressInput && contributionInput) {
+                    const roleValue = roleInput.value;
+                    const progressValue = progressInput.value;
+                    const contributionValue = contributionInput.value;
+
+                    empProjectUpdate.push({
+                        "role": roleValue,
+                        "progress": progressValue,
+                        "contribution": contributionValue,
+                        "projectID": projects[index].projectID,
+                        "projectName": projects[index].name,
+                        "employeeID": employeeID,
+                        "deadline": projects[index].deadline
+                    });
+                }
+            }
+
+            localStorage.setItem("projectUpdate", JSON.stringify(empProjectUpdate));
+            alert("Submission complete!");
+            window.location.reload();
+        }
+    }
+
+    function signOut() {
+        window.location.href = "login.html";
+    }
+</script>
+
+</body>
+</html>

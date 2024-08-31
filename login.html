@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    
+   <style>
+        body, html {
+          height: 100%;
+          width: 100%;
+          margin: 0%;
+          font-family: Arial, Helvetica, sans-serif;
+         
+        
+        }
+       
+        * {
+          box-sizing:border-box;
+        }
+        
+        .bd-img {
+          
+          background-image: url("photos/EES0.png");
+          max-width: auto;
+          
+          
+        
+          min-height: 100%;
+        
+          background-position: center;
+          background-repeat: no-repeat;
+          background-size: cover;
+          position: relative;
+          justify-content: center;
+          display: flexbox;
+          padding: 300px;
+
+          
+        }
+        
+       
+        .container2 {
+          
+          justify-content: center;
+          display: flex;
+          
+
+          
+          
+          
+
+          margin:0 auto;
+          max-width: 400px;
+          padding: 16px;
+          border-radius: 2px;
+          background-color: rgb(8, 8, 8);
+
+        
+          display: block;
+          width:500px;
+          text-align:center;
+          
+         
+        }
+
+        input[type=text], input[type=password] {
+          width: 100%;
+          padding: 15px;
+          margin: 5px 0 22px 0;
+          border: none;
+          background: #fffcfc;
+          margin-bottom:10px;
+         
+          
+        }
+        
+        input[type=text]:focus, input[type=password]:focus {
+          background-color: #fdfbfb;
+          outline: none;
+         
+          
+        }
+        
+
+        .cancelbtn {
+            float: left;
+            width: 50%;
+            padding: 14px 20px;
+            background-color: #d1c9d3;
+            color:white;
+        }
+        .cancelbtn:hover{
+          background-color:#2a2a2b;
+        }
+
+
+        .signinbtn {
+            float: left;
+            width: 50%;
+            padding: 14px 20px;
+            background-color: #e73740;
+            color:white;
+        }
+        .signinbtn:hover{
+          background-color: #79070d;
+        }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        b{
+          color: #fffcfc;
+        }
+        
+        h1{
+          color: #fffcfc;
+        }
+        a{
+          color:white;
+        }
+        
+       
+       
+        
+
+
+   </style>
+</head>
+<body>
+    
+    <div class="bd-img">
+            
+        <form class="container2">
+            <h1>Login</h1>
+            
+            <label for="email"><b>Email</b></label>
+            <input type="text" placeholder="Enter Email" name="email" id="email" required>
+            
+            <label for="password"><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" name="password" id="password" required>
+          <hr>
+            <div class="clearfix">
+                <button type="button"  class="cancelbtn" onclick="signUp()"> Sign Up</a></button>
+                <button type="button" onclick="saveData()" class="signinbtn" > Sign in</button>
+              </div>
+
+        </form>
+    </div>
+ 
+    <script>
+      function saveData() {
+          const email = document.getElementById('email').value;
+          const password = document.getElementById('password').value;
+
+          if (!email || !password) {
+              alert("Please fill in all fields.");
+              return;
+          }
+
+          const user_records = JSON.parse(localStorage.getItem("users")) || [];
+          const loggedUser = user_records.find((user) => user.email === email && user.password === password);
+
+          if (loggedUser) {
+              localStorage.setItem("loggedIDs", JSON.stringify(loggedUser));
+
+              if (loggedUser.role === 'admin') {
+                  window.location.href = "adminDash.html";
+                  alert("login successfull")
+              } else if (loggedUser.role === 'employee') {
+                  window.location.href = "employeeDash.html";
+                  alert("login successfull")
+              } else if (loggedUser.role === 'evaluator') {
+                  window.location.href = "evaluatorDash.html";
+                  alert("login successfull")
+              }
+          } else {
+              alert("Invalid Credentials!");
+          }
+      }
+
+      function signUp() {
+          window.location.href = "Registration.html";
+      }
+  </script>
+
+    
+   
+</body>
+</html>
